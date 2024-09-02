@@ -1,0 +1,48 @@
+.highlight-card {
+    background-color: #292929;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .highlight-card:hover {
+    transform: scale(1.05);
+  }
+  
+  .highlight-thumbnail {
+    width: 100%;
+    height: auto;
+    border-bottom: 2px solid #444;
+  }
+  
+  .highlight-info {
+    padding: 1rem;
+    color: white;
+    text-align: center;
+  }
+  
+  .highlight-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .highlight-category {
+    font-size: 0.9rem;
+    color: #ccc;
+    margin-bottom: 0.5rem;
+  }
+  
+  .highlight-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #aaa;
+  }
+  
+  .highlight-views,
+  .highlight-date {
+    font-weight: 300;
+  }
+  

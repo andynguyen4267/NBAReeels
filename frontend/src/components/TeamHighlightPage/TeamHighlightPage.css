@@ -1,0 +1,38 @@
+/* src/components/TeamHighlightPage/TeamHighlightPage.css */
+.team-highlight-page {
+    padding: 2rem;
+    background-color: #1d1d1d;
+    color: white;
+  }
+  
+  .team-highlights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .highlight-item {
+    background-color: #292929;
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  /* Add this CSS to your TeamHighlightPage.css or main stylesheet */
+.video-responsive {
+    overflow: hidden;
+    padding-bottom: 56.25%;
+    position: relative;
+    height: 0;
+  }
+  
+  .video-responsive iframe {
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+  }
+  
+  
