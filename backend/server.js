@@ -9,6 +9,12 @@ app.use(cors({
     origin: 'https://nbareels.onrender.com', // Frontend URL
     credentials: true // If you're dealing with cookies or auth headers
 }));
+
+app.use((err, req, res, next) => {
+    console.error('Server Error:', err.stack);
+    res.status(500).send('Server Error');
+});
+
 app.use(express.json());
 
 // Use the auth routes
