@@ -6,75 +6,127 @@ const YOUTUBE_API_KEY = 'AIzaSyD42fpdjEEuxEutqerD7YhyBVr2-3DRMQc'; // Replace wi
 const CHANNEL_ID = 'UCWJ2lWNubArHWmf3FIHbfcQ'; // NBA's official YouTube channel ID
 
 const TeamHighlightPage = () => {
-  const { teamName } = useParams(); // Get team name from URL params
-  const [highlights, setHighlights] = useState([]);
+  const { teamName } = useParams(); // Extract team name from URL parameters
+  const [videos, setVideos] = useState([]);
+  const [filteredVideos, setFilteredVideos] = useState([]);
+  const [nextPageToken, setNextPageToken] = useState(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
+  // Fetch team highlights when the component mounts or team name changes
   useEffect(() => {
     fetchTeamHighlights();
   }, [teamName]);
 
+  // Fetch videos when the search term changes
+  useEffect(() => {
+    handleSearch();
+  }, [searchTerm, videos]);
+
+  // Function to fetch team highlights
   const fetchTeamHighlights = async () => {
     try {
+      setIsLoadingMore(true);
+
       const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
         params: {
           key: YOUTUBE_API_KEY,
           channelId: CHANNEL_ID,
-          q: teamName, 
+          q: teamName, // Use the team name to filter the videos
           part: 'snippet',
+          maxResults: 10,
           order: 'viewCount',
-          maxResults: 25,
+          pageToken: nextPageToken,
         },
       });
 
-      const videoIds = response.data.items.map(item => item.id.videoId);
-
-      const videoDetailsResponse = await axios.get('https://www.googleapis.com/youtube/v3/videos', {
-        params: {
-          key: YOUTUBE_API_KEY,
-          id: videoIds.join(','),
-          part: 'statistics',
-        },
-      });
-
-      const videoDetails = videoDetailsResponse.data.items;
-
-      const videoData = response.data.items.map((item, index) => ({
+      const newVideos = response.data.items.map((item) => ({
         id: item.id.videoId,
         title: item.snippet.title,
         thumbnailUrl: item.snippet.thumbnails.high.url,
         datePosted: item.snippet.publishedAt,
-        viewCount: videoDetails[index]?.statistics.viewCount || 'N/A',
       }));
 
-      setHighlights(videoData);
+      // Remove duplicate videos
+      const uniqueVideos = [...videos, ...newVideos].reduce((acc, video) => {
+        const isDuplicate = acc.find((v) => v.id === video.id);
+        if (!isDuplicate) {
+          acc.push(video);
+        }
+        return acc;
+      }, []);
+
+      setVideos(uniqueVideos);
+      setFilteredVideos(uniqueVideos);
+      setNextPageToken(response.data.nextPageToken || null);
     } catch (error) {
       console.error('Error fetching team highlights:', error);
+    } finally {
+      setIsLoadingMore(false);
     }
   };
 
+  // Search function to filter videos based on search term
+  const handleSearch = () => {
+    if (!searchTerm) {
+      setFilteredVideos(videos);
+    } else {
+      const filtered = videos.filter((video) =>
+        video.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredVideos(filtered);
+    }
+  };
+
+  // Handle search input change
+  const handleSearchInputChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  // Function to handle loading more videos when "Load More" is clicked
+  const loadMoreVideos = () => {
+    fetchTeamHighlights();
+  };
+
   return (
-    <div className="team-highlight-page">
-      <h2>Highlights for the {teamName}</h2>
-      <div className="team-highlights">
-        {highlights.map((highlight) => (
-          <div key={highlight.id} className="highlight-item">
-            <h3>{highlight.title}</h3>
-            <p>{new Date(highlight.datePosted).toLocaleDateString()}</p>
-            <p>Views: {highlight.viewCount}</p>
-            <div className="video-responsive">
-              <iframe
-                width="560"
-                height="315"
-                src={`https://www.youtube.com/embed/${highlight.id}`}
-                title={highlight.title}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
+    <div className="team-highlight-container">
+      <h1>{teamName} Highlights</h1> {/* Display team name */}
+
+      {/* Search Bar */}
+      <div className="search-bar-container">
+        <input
+          type="text"
+          className="search-bar"
+          placeholder="Search team highlights..."
+          value={searchTerm}
+          onChange={handleSearchInputChange}
+        />
+      </div>
+
+      <div className="team-videos">
+        {filteredVideos.map((video, index) => (
+          <div key={`${video.id}-${index}`} className="video-item">
+            <iframe
+              width="100%"
+              height="315"
+              src={`https://www.youtube.com/embed/${video.id}`}
+              title={video.title}
+              frameBorder="0"
+              allowFullScreen
+            ></iframe>
+            <div className="video-info">
+              <h3>{video.title}</h3>
+              <p>Posted on {new Date(video.datePosted).toLocaleDateString()}</p>
             </div>
           </div>
         ))}
       </div>
+
+      {nextPageToken && (
+        <button className="load-more-button" onClick={loadMoreVideos}>
+          {isLoadingMore ? 'Loading...' : 'Load More'}
+        </button>
+      )}
     </div>
   );
 };

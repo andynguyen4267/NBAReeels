@@ -6,120 +6,161 @@ const YOUTUBE_API_KEY = 'AIzaSyD42fpdjEEuxEutqerD7YhyBVr2-3DRMQc'; // Replace wi
 const CHANNEL_ID = 'UCWJ2lWNubArHWmf3FIHbfcQ'; // NBA's official YouTube channel ID
 
 const Home = () => {
-  const [highlights, setHighlights] = useState([]);
-  const [filteredHighlights, setFilteredHighlights] = useState([]);
+  const [videos, setVideos] = useState([]);
+  const [filteredVideos, setFilteredVideos] = useState([]);
+  const [nextPageToken, setNextPageToken] = useState(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [playlistId, setPlaylistId] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Fetch the upload playlist ID when the component mounts
   useEffect(() => {
-    fetchHighlights();
+    const getUploadPlaylistId = async () => {
+      const uploadsId = await fetchUploadPlaylistId();
+      if (uploadsId) {
+        setPlaylistId(uploadsId);
+        fetchVideosFromPlaylist(uploadsId);
+      }
+    };
+
+    getUploadPlaylistId();
   }, []);
 
+  // Fetch videos when the playlist ID or page token changes
+  useEffect(() => {
+    if (playlistId) {
+      fetchVideosFromPlaylist(playlistId);
+    }
+  }, [playlistId, nextPageToken]);
+
+  // Handle search term changes
   useEffect(() => {
     handleSearch();
-  }, [searchTerm, highlights]);
+  }, [searchTerm, videos]);
 
-  const fetchHighlights = async () => {
+  // Function to fetch the upload playlist ID
+  const fetchUploadPlaylistId = async () => {
     try {
-      const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+      const response = await axios.get('https://www.googleapis.com/youtube/v3/channels', {
         params: {
+          part: 'contentDetails',
+          id: CHANNEL_ID,
           key: YOUTUBE_API_KEY,
-          channelId: CHANNEL_ID,
-          part: 'snippet',
-          order: 'viewCount',
-          maxResults: 50,
         },
       });
 
-      const videoIds = response.data.items.map((item) => item.id.videoId).join(',');
-
-      const videoDetailsResponse = await axios.get('https://www.googleapis.com/youtube/v3/videos', {
-        params: {
-          key: YOUTUBE_API_KEY,
-          id: videoIds,
-          part: 'contentDetails,snippet,statistics',
-        },
-      });
-
-      const videoDetails = videoDetailsResponse.data.items;
-
-      const videoData = videoDetails
-        .filter((video) => {
-          const duration = video.contentDetails.duration;
-          const durationSeconds = parseDuration(duration);
-          return durationSeconds > 60; // Exclude Shorts
-        })
-        .map((video) => ({
-          id: video.id,
-          title: video.snippet.title,
-          thumbnailUrl: video.snippet.thumbnails.high.url,
-          views: video.statistics.viewCount || 'N/A',
-          datePosted: video.snippet.publishedAt,
-        }));
-
-      setHighlights(videoData);
-      setFilteredHighlights(videoData);
+      const uploadsPlaylistId = response.data.items[0].contentDetails.relatedPlaylists.uploads;
+      return uploadsPlaylistId;
     } catch (error) {
-      console.error('Error fetching highlights:', error);
+      console.error('Error fetching upload playlist ID:', error);
+      return null;
     }
   };
 
-  const parseDuration = (duration) => {
-    let match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
-    let hours = (parseInt(match[1]) || 0);
-    let minutes = (parseInt(match[2]) || 0);
-    let seconds = (parseInt(match[3]) || 0);
-    return hours * 3600 + minutes * 60 + seconds;
+  // Function to fetch videos from the playlist
+  const fetchVideosFromPlaylist = async (playlistId, pageToken = '') => {
+    try {
+      setIsLoadingMore(true);
+
+      const response = await axios.get('https://www.googleapis.com/youtube/v3/playlistItems', {
+        params: {
+          part: 'snippet',
+          playlistId,
+          key: YOUTUBE_API_KEY,
+          maxResults: 10, // Adjust as needed
+          pageToken, // For pagination
+        },
+      });
+
+      const newVideos = response.data.items.map((item) => ({
+        id: item.snippet.resourceId.videoId,
+        title: item.snippet.title,
+        thumbnailUrl: item.snippet.thumbnails.high.url,
+        datePosted: item.snippet.publishedAt,
+      }));
+
+      // Remove duplicates by checking video IDs
+      const uniqueVideos = [...videos, ...newVideos].reduce((acc, video) => {
+        const isDuplicate = acc.find((v) => v.id === video.id);
+        if (!isDuplicate) {
+          acc.push(video);
+        }
+        return acc;
+      }, []);
+
+      setVideos(uniqueVideos);
+      setFilteredVideos(uniqueVideos);
+      setNextPageToken(response.data.nextPageToken || null);
+    } catch (error) {
+      console.error('Error fetching videos:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
   };
 
+  // Search function to filter videos based on search term
   const handleSearch = () => {
-    const filtered = highlights.filter((highlight) =>
-      highlight.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredHighlights(filtered);
+    if (!searchTerm) {
+      setFilteredVideos(videos);
+    } else {
+      const filtered = videos.filter((video) =>
+        video.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredVideos(filtered);
+    }
   };
 
-  const handleInputChange = (event) => {
+  // Handle search input change
+  const handleSearchInputChange = (event) => {
     setSearchTerm(event.target.value);
+  };
+
+  // Function to handle loading more videos when "Load More" is clicked
+  const loadMoreVideos = () => {
+    if (playlistId && nextPageToken) {
+      fetchVideosFromPlaylist(playlistId, nextPageToken);
+    }
   };
 
   return (
     <div className="home-container">
-      <div className="home-search">
+      <h1>Latest Videos</h1>
+
+      {/* Search Bar */}
+      <div className="search-bar-container">
         <input
           type="text"
           className="search-bar"
-          placeholder="Search Highlights..."
+          placeholder="Search videos..."
           value={searchTerm}
-          onChange={handleInputChange}
+          onChange={handleSearchInputChange}
         />
       </div>
-      <div className="home-categories">
-        <button className="category-button">Dunks</button>
-        <button className="category-button">3-pointers</button>
-        <button className="category-button">Clutch Shots</button>
-        <button className="category-button">Assists</button>
-        <button className="category-button">Handles</button>
-      </div>
-      <div className="home-highlights">
-        {filteredHighlights.map((highlight) => (
-          <div key={highlight.id} className="highlight-item">
+
+      <div className="home-videos">
+        {filteredVideos.map((video, index) => (
+          <div key={`${video.id}-${index}`} className="video-item">
             <iframe
               width="100%"
               height="315"
-              src={`https://www.youtube.com/embed/${highlight.id}`}
-              title={highlight.title}
+              src={`https://www.youtube.com/embed/${video.id}`}
+              title={video.title}
               frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             ></iframe>
-            <div className="highlight-info">
-              <h3>{highlight.title}</h3>
-              <p>{highlight.views} views</p>
-              <p>{new Date(highlight.datePosted).toLocaleDateString()}</p>
+            <div className="video-info">
+              <h3>{video.title}</h3>
+              <p>Posted on {new Date(video.datePosted).toLocaleDateString()}</p>
             </div>
           </div>
         ))}
       </div>
+
+      {nextPageToken && (
+        <button className="load-more-button" onClick={loadMoreVideos}>
+          {isLoadingMore ? 'Loading...' : 'Load More'}
+        </button>
+      )}
     </div>
   );
 };

@@ -6,8 +6,9 @@ const pool = require('../db'); // Import your PostgreSQL connection pool
 const router = express.Router();
 
 // Register Route
-router.post('/register', async (req, res) => {
+router.post('/signup', async (req, res) => {
     const { username, email, password } = req.body;
+    console.log('Signup request received:', { username, email });
 
     try {
         // Check if user exists
@@ -19,6 +20,7 @@ router.post('/register', async (req, res) => {
         // Hash the password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
+        console.log('Signup request received:', { username, email });
 
         // Save the user to the database
         const newUser = await pool.query(
@@ -27,7 +29,7 @@ router.post('/register', async (req, res) => {
         );
 
         // Generate a JWT
-        const token = jwt.sign({ id: newUser.rows[0].id }, "9c72cbf363b7b95a4728aea3b905afc87edba75365478ab41044c0427d61bfdb", {
+        const token = jwt.sign({ id: newUser.rows[0].id }, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzI1NTUxMjQ3LCJleHAiOjE3MjU1NTQ4NDd9.sGgrnkhnJMCcAfLtHdDJV2Mf1pKgleDYCHAklJLurdA", {
             expiresIn: '1h',
         });
 
@@ -55,13 +57,15 @@ router.post('/login', async (req, res) => {
         }
 
         // Generate a JWT
-        const token = jwt.sign({ id: user.rows[0].id }, process.env.JWT_SECRET, {
+        const token = jwt.sign({ id: user.rows[0].id }, "9c72cbf363b7b95a4728aea3b905afc87edba75365478ab41044c0427d61bfdb", {
             expiresIn: '1h',
         });
 
         res.json({ token });
     } catch (err) {
-        res.status(500).send('Server error');
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+
     }
 });
 

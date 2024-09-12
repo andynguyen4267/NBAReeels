@@ -1,33 +1,62 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const navigate = useNavigate();
+
 
     const validateEmail = (email) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(String(email).toLowerCase());
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        
+    
+        // Validate email
         if (!validateEmail(email)) {
             setErrorMessage('Please enter a valid email address');
             return;
         }
-
+    
+        // Validate password
         if (!password) {
             setErrorMessage('Please enter your password');
             return;
         }
-
+    
         setErrorMessage('');
-        alert('Logged in successfully!'); // Placeholder for successful login
-    };
+    
+        try {
+            const response = await fetch('http://localhost:5001/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+    
+            // Check if the response is okay
+            if (!response.ok) {
+                const errorText = await response.text();
+                setErrorMessage(errorText || 'Login failed. Please try again.');
+                return;
+            }
+    
+            const data = await response.json();
+            localStorage.setItem('token', data.token);
+            navigate('/');
+            
+        } catch (error) {
+            console.error('Error during login:', error);
+            setErrorMessage('An error occurred. Please try again later.');
+        }
+    };    
+    
 
     return (
         <div className="login-container">

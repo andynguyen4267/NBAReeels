@@ -1,103 +1,48 @@
 .home-container {
-  padding: 2rem;
-  background-color: #1d1d1d;
-  color: white;
+  padding: 20px;
+  text-align: center;
 }
 
-.home-search {
+.home-videos {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  margin-bottom: 1.5rem;
+  gap: 20px;
+}
+
+.video-item {
+  width: 320px;
+  margin-bottom: 20px;
+}
+
+.video-info {
+  margin-top: 10px;
+}
+
+/* Search bar styling */
+.search-bar-container {
+  margin-bottom: 20px;
 }
 
 .search-bar {
-  width: 100%;
-  max-width: 500px;
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 4px;
+  padding: 10px;
+  width: 80%;
+  max-width: 400px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
 }
 
-.home-categories {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.category-button {
-  background-color: #555;
+.load-more-button {
+  padding: 10px 20px;
+  background-color: #0073e6;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  border-radius: 5px;
+  font-size: 16px;
 }
 
-.category-button:hover {
-  background-color: #777;
+.load-more-button:hover {
+  background-color: #005bb5;
 }
-
-.category-button.active {
-  background-color: #0077ff;
-  color: white;
-}
-
-.home-highlights {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Increase the min-width to ensure enough space for content */
-  gap: 1rem;
-  padding: 1rem;
-}
-
-.highlight-item {
-  background-color: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  text-align: center;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-}
-
-.highlight-thumbnail {
-  width: 100%;
-  height: auto;
-  border-radius: 4px;
-}
-
-.highlight-info {
-  margin-top: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.highlight-info h3 {
-  font-size: 1.2rem; /* Ensure the font size is large enough to display text clearly */
-  margin-bottom: 0.5rem;
-  color: #120303; /* White color for visibility */
-  text-align: center; /* Center the title text */
-  white-space: normal; /* Allow text to wrap to the next line if it's too long */
-  overflow: visible; /* Ensure text is not hidden */
-  word-wrap: break-word; /* Break long words */
-  max-width: 100%; /* Ensure the title does not exceed the container width */
-}
-
-.highlight-info p {
-  font-size: 0.9rem;
-  color: #000000;
-  margin: 0.25rem 0;
-  text-align: center;
-  max-width: 90%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-
-  
-  

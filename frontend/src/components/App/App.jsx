@@ -5,7 +5,6 @@ import Navbar from '../Navbar/Navbar'; // Ensure the path is correct
 import Home from '../Home/Home';
 import PlayerHighlights from '../PlayerHighlights/PlayerHighlights';
 import TeamHighlights from '../TeamHighlights/TeamHighlights';
-import Favorites from '../Favorites/Favorites';
 import Login from '../Login/Login';
 import Signup from '../Signup/Signup';
 import PlayerDetails from '../PlayerDetails/PlayerDetails';
@@ -23,7 +22,6 @@ const App = () => {
         <Route path="/player/:playerId" element={<PlayerDetails />} />
         <Route path="/teams" element={<TeamHighlights />} />
         <Route path="/team/:teamName" element={<TeamHighlightPage />} />
-        <Route path="/favorites" element={<Favorites />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
       </Routes>
