@@ -36,8 +36,9 @@ const Signup = () => {
             return;
         }
 
+        URL = 'https://nbareels-backend.onrender.com' || 'http://localhost:5001'
         try {
-            const response = await fetch('http://localhost:5001/api/auth/signup', {
+            const response = await fetch('https://nbareels-backend.onrender.com/api/auth/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

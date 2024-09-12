@@ -30,9 +30,9 @@ const Login = () => {
         }
     
         setErrorMessage('');
-    
+        URL = 'https://nbareels-backend.onrender.com' || 'http://localhost:5001'
         try {
-            const response = await fetch('http://localhost:5001/api/auth/login', {
+            const response = await fetch('https://nbareels-backend.onrender.com/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
