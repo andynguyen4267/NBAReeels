@@ -4,7 +4,11 @@ const app = express();
 const authRoutes = require('./auth/auth'); // Adjust the path as necessary
 const favoriteRoutes = require('./routes/favorites'); // New route for favorites
 
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+    origin: 'https://nbareels.onrender.com', // Frontend URL
+    credentials: true // If you're dealing with cookies or auth headers
+}));
 app.use(express.json());
 
 // Use the auth routes
