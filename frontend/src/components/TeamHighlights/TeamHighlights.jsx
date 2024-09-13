@@ -45,7 +45,7 @@ const TeamHighlights = () => {
     const fetchFavorites = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:5001/api/favorites/teams',
+          'https://nbareels-backend.onrender.com/api/favorites/teams',
           { headers: { Authorization: `Bearer ${token}` } } // Send token for auth
         );
         setFavorites(response.data); // Update the favorites state with the fetched data
@@ -110,7 +110,7 @@ const TeamHighlights = () => {
     try {
       // Send the teamId in the request body instead of the entire array
       await axios.post(
-        'http://localhost:5001/api/favorites/teams',
+        'https://nbareels-backend.onrender.com/api/favorites/teams',
         { teamId }, // Only sending the teamId that is being added/removed
         { headers: { Authorization: `Bearer ${token}` } } // JWT token for auth
       );

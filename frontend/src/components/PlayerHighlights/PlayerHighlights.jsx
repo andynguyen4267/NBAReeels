@@ -19,7 +19,7 @@ const PlayerHighlights = () => {
                     'Authorization': '408b7fc5-a3f6-45dd-8513-1fd506e18792', // Replace with your actual key or remove if unnecessary
                 },
                 params: {
-                    per_page: 5,
+                    per_page: 25,
                     cursor: cursor,
                 },
             });
@@ -29,8 +29,8 @@ const PlayerHighlights = () => {
 
             console.log('Fetched players:', allPlayers); // Log players
 
-            if (allPlayers.length >= 5) {
-                setPlayers(allPlayers.slice(0, 5));
+            if (allPlayers.length >= 300) {
+                setPlayers(allPlayers.slice(0, 300));
             } else if (response.data.meta.next_cursor) {
                 await fetchPlayers(response.data.meta.next_cursor, allPlayers);
             }
@@ -74,7 +74,7 @@ const PlayerHighlights = () => {
         fetchPlayers();
         const fetchFavorites = async () => {
             try {
-                const response = await axios.get('http://localhost:5001/api/favorites/players', {
+                const response = await axios.get('https://nbareels-backend.onrender.com/api/favorites/players', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 console.log('Fetched favorite players:', response.data); // Log favorite players from backend
@@ -109,7 +109,7 @@ const PlayerHighlights = () => {
                 newFavorites.delete(playerId);
                 try {
                     console.log('Removing player from favorites:', playerId); // Log player ID being removed
-                    await axios.delete(`http://localhost:5001/api/favorites/players/${playerId}`, {
+                    await axios.delete(`https://nbareels-backend.onrender.com/api/favorites/players/${playerId}`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                 } catch (error) {
@@ -120,7 +120,7 @@ const PlayerHighlights = () => {
                 newFavorites.add(playerId);
                 try {
                     console.log('Adding player to favorites:', playerId); // Log player ID being added
-                    await axios.post('http://localhost:5001/api/favorites/players', 
+                    await axios.post('https://nbareels-backend.onrender.com/api/favorites/players', 
                     { playerId }, 
                     { headers: { Authorization: `Bearer ${token}` } });
                 } catch (error) {
