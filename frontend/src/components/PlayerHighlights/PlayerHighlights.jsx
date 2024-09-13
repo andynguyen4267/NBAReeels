@@ -29,8 +29,8 @@ const PlayerHighlights = () => {
 
             console.log('Fetched players:', allPlayers); // Log players
 
-            if (allPlayers.length >= 100) {
-                setPlayers(allPlayers.slice(0, 100));
+            if (allPlayers.length >= 200) {
+                setPlayers(allPlayers.slice(0, 200));
             } else if (response.data.meta.next_cursor) {
                 await fetchPlayers(response.data.meta.next_cursor, allPlayers);
             }
