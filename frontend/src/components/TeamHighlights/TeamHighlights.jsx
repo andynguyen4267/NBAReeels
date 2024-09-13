@@ -39,7 +39,6 @@ const TeamHighlights = () => {
   const [favorites, setFavorites] = useState([]);
   const token = localStorage.getItem('token'); // Get token for API calls
 
-  
   // Fetch user's favorite teams from the backend
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -97,6 +96,18 @@ const TeamHighlights = () => {
     setTeams(TeamsList);
   }, []);
 
+  // Sort teams by favorites, bringing favorited teams to the front
+  const getSortedTeams = () => {
+    return [...teams].sort((a, b) => {
+      const isAFavorite = favorites.includes(a.id);
+      const isBFavorite = favorites.includes(b.id);
+
+      if (isAFavorite && !isBFavorite) return -1; // a comes before b
+      if (!isAFavorite && isBFavorite) return 1;  // b comes before a
+      return 0; // no change in order
+    });
+  };
+
   // Toggle favorite status and send updated favorites to the backend
   const toggleFavorite = async (teamId) => {
     // Check if the team is already in the favorites list and update it
@@ -123,10 +134,9 @@ const TeamHighlights = () => {
     navigate(`/team/${teamName}`);
   };
 
-
   return (
     <div className="team-highlights-container">
-      {teams.map((team) => (
+      {getSortedTeams().map((team) => (
         <div
           key={team.id}
           className="team-card"
